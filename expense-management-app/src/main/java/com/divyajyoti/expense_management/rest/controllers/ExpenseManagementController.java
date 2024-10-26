@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ExpenseManagementController {
 
     public ResponseEntity<?> addExpense(){
-        com.divyajyoti.user_management.dto.UserDto;
         return null;
     }
 }
