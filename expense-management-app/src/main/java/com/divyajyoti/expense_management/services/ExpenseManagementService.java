@@ -49,11 +49,12 @@ public class ExpenseManagementService {
         SplitType expenseType = expenseRequestDto.getSplitType();
         double totalAmount = expenseRequestDto.getTotalAmount();
         UserDto paidBy = expenseRequestDto.getPaidBy();
-        String name = expenseRequestDto.getName();
+        String name = expenseRequestDto.getDescription();
         List<GenericSplitModel> requestUserSplitsList = expenseRequestDto.getUserSplitsList();
         List<SplitModel> splitModelList = new ArrayList<>();
         switch (expenseType) {
             case EXACT:
+                log.info("EXECUTING EXACT SPLIT_TYPE FOR EXPENSE_NAME: {}", expenseRequestDto.getDescription());
                 for (GenericSplitModel genericSplitModel : requestUserSplitsList) {
                     splitModelList.add(new ExactSplitModel(genericSplitModel.getUser(), genericSplitModel.getAmount()));
                 }
@@ -71,6 +72,8 @@ public class ExpenseManagementService {
                     throw new GenericRestException("GROUP PROVIDED DOES NOT EXIST", HttpStatus.BAD_REQUEST);
                 List<UserExpenseMappingEntity> userExpenseMappingEntityList = new ArrayList<>();
                 ExpenseEntity providedExpenseEntity = new ExpenseEntity();
+                providedExpenseEntity.setDescription(expenseRequestDto.getDescription());
+                providedExpenseEntity.setTotalAmount(expenseRequestDto.getTotalAmount());
                 providedExpenseEntity.setUserExpenseMappingEntityList(userExpenseMappingEntityList);
                 UserExpenseMappingEntity userExpenseMappingEntity;
                 for (SplitModel split : expenseRequestDto.getUserSplitsList()) {
@@ -87,10 +90,12 @@ public class ExpenseManagementService {
                     userExpenseMappingEntity = new UserExpenseMappingEntity();
                     userExpenseMappingEntity.setExpenseEntity(providedExpenseEntity);
                     userExpenseMappingEntity.setUserEntity(fetchedUserEntity);
+                    userExpenseMappingEntity.setAmount(split.getAmount());
                     if(fetchedUserEntity.getContact().equals(paidBy.getContact()))
                         userExpenseMappingEntity.setExpenseType(ExpenseType.PAID_BY);
                     else
                         userExpenseMappingEntity.setExpenseType(ExpenseType.OWES_IT);
+                    userExpenseMappingEntityList.add(userExpenseMappingEntity);
                 }
                 ExpenseEntity savedExpenseEntity;
                 try{

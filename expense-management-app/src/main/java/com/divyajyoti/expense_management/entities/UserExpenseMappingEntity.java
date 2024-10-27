@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "USER_EXPENSE_DETAILS")
+@Table(name = "USER_EXPENSE_RECORDS")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,7 +26,7 @@ public class UserExpenseMappingEntity extends BaseEntity{
     @Column(name = "AMOUNT")
     private double amount;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Column(name = "EXPENSE_TYPE")
     private ExpenseType expenseType;
 

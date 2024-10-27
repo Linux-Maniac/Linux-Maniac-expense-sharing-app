@@ -16,19 +16,17 @@ import java.util.List;
 @AllArgsConstructor
 public class ExpenseEntity extends BaseEntity{
 
+    @Column(name = "EXPENSE_DESCRIPTION")
     private String description;
 
-    private double amount;
+    @Column(name = "TOTAL_AMOUNT")
+    private double totalAmount;
 
-    @OneToMany(mappedBy = "expenseEntity")
+    @OneToMany(mappedBy = "expenseEntity", cascade = CascadeType.PERSIST)
     private List<UserExpenseMappingEntity> userExpenseMappingEntityList;
 
     @ManyToOne
     @JoinColumn(name = "GROUP_ID")
     private GroupEntity groupEntity;
-
-    @ManyToOne
-    @JoinColumn(name = "USER_ID")
-    private UserEntity userEntity;
 
 }

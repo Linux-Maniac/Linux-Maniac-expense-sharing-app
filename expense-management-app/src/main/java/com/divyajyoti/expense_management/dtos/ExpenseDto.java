@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ExpenseDto implements Serializable {
 
-    private String name;
+    private String description;
 
     private SplitType splitType;
 
