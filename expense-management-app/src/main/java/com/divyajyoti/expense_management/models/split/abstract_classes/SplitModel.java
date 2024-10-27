@@ -1,4 +1,4 @@
-package com.divyajyoti.expense_management.dtos.split.abstract_classes;
+package com.divyajyoti.expense_management.models.split.abstract_classes;
 
 import com.divyajyoti.expense_management.dtos.UserDto;
 import lombok.AllArgsConstructor;
@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public abstract class SplitDto {
+public abstract class SplitModel {
 
     private UserDto user;
 
     private double amount;
 
-    public SplitDto(UserDto user){
+    public SplitModel(UserDto user){
         this.user = user;
     }
 
