@@ -1,4 +1,4 @@
-package com.divyajyoti.group_management.entity;
+package com.divyajyoti.group_management.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;

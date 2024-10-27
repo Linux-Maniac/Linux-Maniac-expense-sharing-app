@@ -1,4 +1,4 @@
-package com.divyajyoti.group_management.dto;
+package com.divyajyoti.group_management.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

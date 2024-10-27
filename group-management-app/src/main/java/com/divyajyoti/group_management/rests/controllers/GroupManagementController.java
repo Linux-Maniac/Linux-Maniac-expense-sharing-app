@@ -1,9 +1,9 @@
-package com.divyajyoti.group_management.rest.controller;
+package com.divyajyoti.group_management.rests.controllers;
 
-import com.divyajyoti.group_management.dto.GroupDto;
-import com.divyajyoti.group_management.dto.ResponseStatusDto;
-import com.divyajyoti.group_management.dto.UserDto;
-import com.divyajyoti.group_management.service.GroupManagementService;
+import com.divyajyoti.group_management.dtos.GroupDto;
+import com.divyajyoti.group_management.dtos.ResponseStatusDto;
+import com.divyajyoti.group_management.dtos.UserDto;
+import com.divyajyoti.group_management.services.GroupManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
