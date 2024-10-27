@@ -1,6 +1,6 @@
-package com.divyajyoti.user_management.aop;
+package com.divyajyoti.user_management.aops;
 
-import com.divyajyoti.user_management.rest.exception.GenericRestException;
+import com.divyajyoti.user_management.rests.exceptions.GenericRestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

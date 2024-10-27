@@ -1,6 +1,5 @@
-package com.divyajyoti.user_management.dto;
+package com.divyajyoti.user_management.dtos;
 
-import com.divyajyoti.user_management.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

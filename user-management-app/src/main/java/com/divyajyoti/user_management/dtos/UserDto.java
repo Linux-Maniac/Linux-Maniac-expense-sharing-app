@@ -1,4 +1,4 @@
-package com.divyajyoti.user_management.dto;
+package com.divyajyoti.user_management.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

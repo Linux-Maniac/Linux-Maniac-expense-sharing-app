@@ -1,8 +1,8 @@
-package com.divyajyoti.user_management.rest.controller;
+package com.divyajyoti.user_management.rests.controllers;
 
-import com.divyajyoti.user_management.dto.ResponseStatusDto;
-import com.divyajyoti.user_management.dto.UserDto;
-import com.divyajyoti.user_management.service.UserManagementService;
+import com.divyajyoti.user_management.dtos.ResponseStatusDto;
+import com.divyajyoti.user_management.dtos.UserDto;
+import com.divyajyoti.user_management.services.UserManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

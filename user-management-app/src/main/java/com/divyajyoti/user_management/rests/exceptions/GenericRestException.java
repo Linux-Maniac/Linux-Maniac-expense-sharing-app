@@ -1,4 +1,4 @@
-package com.divyajyoti.user_management.rest.exception;
+package com.divyajyoti.user_management.rests.exceptions;
 
 import lombok.Data;
 import org.springframework.http.HttpStatus;

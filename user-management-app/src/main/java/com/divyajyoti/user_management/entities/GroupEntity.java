@@ -1,4 +1,4 @@
-package com.divyajyoti.user_management.entity;
+package com.divyajyoti.user_management.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,7 +27,7 @@ public class GroupEntity extends BaseEntity implements Serializable {
     private String name;
 
     @ManyToMany
-    @JoinTable(name = "USER_GROUP_DETAILS")
+    @JoinTable(name = "USER_GROUP_RELATIONS")
     private List<UserEntity> members;
 
 }

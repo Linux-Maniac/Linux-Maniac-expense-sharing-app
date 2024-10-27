@@ -1,10 +1,10 @@
-package com.divyajyoti.user_management.service;
+package com.divyajyoti.user_management.services;
 
-import com.divyajyoti.user_management.dto.ResponseStatusDto;
-import com.divyajyoti.user_management.dto.UserDto;
-import com.divyajyoti.user_management.entity.UserEntity;
-import com.divyajyoti.user_management.repository.UserManagementRepository;
-import com.divyajyoti.user_management.rest.exception.GenericRestException;
+import com.divyajyoti.user_management.dtos.ResponseStatusDto;
+import com.divyajyoti.user_management.dtos.UserDto;
+import com.divyajyoti.user_management.entities.UserEntity;
+import com.divyajyoti.user_management.repositories.UserEntityRepository;
+import com.divyajyoti.user_management.rests.exceptions.GenericRestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
@@ -18,18 +18,18 @@ import java.util.Optional;
 @Service
 public class UserManagementService {
 
-    private final UserManagementRepository userManagementRepository;
+    private final UserEntityRepository userEntityRepository;
 
     @Autowired
-    public UserManagementService(UserManagementRepository userManagementRepository) {
-        this.userManagementRepository = userManagementRepository;
+    public UserManagementService(UserEntityRepository userEntityRepository) {
+        this.userEntityRepository = userEntityRepository;
     }
 
     @CachePut(value = "expense-sharing-user-management", key = "(#userData.name + '-' + #userData.contact).toUpperCase()")
     public ResponseStatusDto registerNewUser(UserDto userData) {
         Optional<UserEntity> optionalUser;
         try {
-            optionalUser = userManagementRepository.findByContact(userData.getContact());
+            optionalUser = userEntityRepository.findByContact(userData.getContact());
         } catch (Exception e) {
             throw new GenericRestException("DATABASE ERROR, PLEASE TRY LATER!", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -41,7 +41,7 @@ public class UserManagementService {
         newUser.setEmail(userData.getEmail());
         UserEntity savedUser;
         try {
-            savedUser = userManagementRepository.save(newUser);
+            savedUser = userEntityRepository.save(newUser);
         } catch (Exception e) {
             throw new GenericRestException("ERROR WHILE SAVING INFO INTO DATABASE!", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -52,7 +52,7 @@ public class UserManagementService {
     public ResponseStatusDto updateUserDetails(UserDto userData, BigInteger id) {
         Optional<UserEntity> optionalUser;
         try {
-            optionalUser = userManagementRepository.findById(id);
+            optionalUser = userEntityRepository.findById(id);
         } catch (Exception e) {
             log.error("DB_FETCH_ERR: {}", e.getMessage());
             throw new GenericRestException("DATABASE ERROR, PLEASE TRY LATER!", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -66,7 +66,7 @@ public class UserManagementService {
         newUser.setEmail(userData.getEmail());
         UserEntity savedUser;
         try {
-            savedUser = userManagementRepository.save(newUser);
+            savedUser = userEntityRepository.save(newUser);
         } catch (Exception e) {
             throw new GenericRestException("ERROR WHILE UPDATING INFO INTO DATABASE!", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -76,7 +76,7 @@ public class UserManagementService {
     public ResponseStatusDto getUserDetails(BigInteger id) {
         Optional<UserEntity> optionalUser;
         try{
-            optionalUser = userManagementRepository.findById(id);
+            optionalUser = userEntityRepository.findById(id);
         } catch (Exception e){
             log.error("DATABASE ERROR WHILE GETTING USER DATA: {}", e.getMessage());
             throw new GenericRestException("SERVER ERROR WHILE GETTING USER DATA: {}", HttpStatus.INTERNAL_SERVER_ERROR);
