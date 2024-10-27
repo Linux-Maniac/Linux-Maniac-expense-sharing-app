@@ -5,6 +5,7 @@ import com.divyajyoti.group_management.dtos.UserDto;
 import com.divyajyoti.group_management.entities.UserEntity;
 import com.divyajyoti.group_management.dtos.ResponseStatusDto;
 import com.divyajyoti.group_management.entities.GroupEntity;
+import com.divyajyoti.group_management.models.UserModel;
 import com.divyajyoti.group_management.repositories.GroupEntityRepository;
 import com.divyajyoti.group_management.repositories.UserEntityRepository;
 import com.divyajyoti.group_management.rests.exceptions.GenericRestException;
@@ -62,7 +63,10 @@ public class GroupManagementService {
             log.error("DATABASE_ERR_IN_GROUP_DATA_CREATION: {}", e.getMessage());
             throw new GenericRestException("ERROR WHILE CREATING GROUP INFO IN DATABASE", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        Map<String, Object> details = Map.of("newGroupDetails", savedGroupEntity);
+        List<UserModel> groupMembersList = getUserModels(savedGroupEntity);
+        Map<String, Object> details = new HashMap<>();
+        details.put("membersCount", groupMembersList.size());
+        details.put("groupMembers", groupMembersList);
         return new ResponseStatusDto("SUCCESS", "GROUP SUCCESSFULLY CREATED!", details);
     }
 
@@ -98,22 +102,22 @@ public class GroupManagementService {
         if(optionalGroupEntity.isEmpty())
             throw new GenericRestException("ERROR: GROUP DOES NOT EXISTS!", HttpStatus.NOT_FOUND);
         Map<String, Object> details = new HashMap<>();
-        List<UserDto> groupMembersList = getUserDtos(optionalGroupEntity);
+        List<UserModel> groupMembersList = getUserModels(optionalGroupEntity.get());
         details.put("membersCount", groupMembersList.size());
         details.put("groupMembers", groupMembersList);
         log.info("RETURNING RESPONSE");
         return new ResponseStatusDto("SUCCESS", "GROUP MEMBERS DETAILS FETCHED!", details);
     }
 
-    private static List<UserDto> getUserDtos(Optional<GroupEntity> optionalGroupEntity) {
+    private List<UserModel> getUserModels(GroupEntity groupEntity) {
         log.info("EXECUTING GET MEMBERS QUERY");
-        List<UserEntity> fetcheUserEntitiesList = optionalGroupEntity.get().getMembers();
-        List<UserDto> groupMembersList = new ArrayList<>();
-        UserDto groupMember;
+        List<UserEntity> fetcheUserEntitiesList = groupEntity.getMembers();
+        List<UserModel> groupMembersList = new ArrayList<>();
+        UserModel groupMember;
         UserEntity fetchedUserEntity;
         for (UserEntity userEntity : fetcheUserEntitiesList) {
             fetchedUserEntity = userEntity;
-            groupMember = new UserDto();
+            groupMember = new UserModel();
             groupMember.setName(fetchedUserEntity.getName());
             groupMember.setContact(fetchedUserEntity.getContact());
             groupMember.setEmail(fetchedUserEntity.getEmail());
