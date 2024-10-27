@@ -1,6 +1,6 @@
-package com.divyajyoti.group_management.repository;
+package com.divyajyoti.group_management.repositories;
 
-import com.divyajyoti.group_management.entity.GroupEntity;
+import com.divyajyoti.group_management.entities.GroupEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,7 +10,7 @@ import java.math.BigInteger;
 import java.util.Optional;
 
 @Repository
-public interface GroupManagementRepository extends JpaRepository<GroupEntity, BigInteger> {
+public interface GroupEntityRepository extends JpaRepository<GroupEntity, BigInteger> {
 
     //public List<UserDto> findAllMembers(BigInteger id);
 
