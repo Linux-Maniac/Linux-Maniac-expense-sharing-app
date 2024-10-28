@@ -1,6 +1,5 @@
 package com.divyajyoti.group_management.models;
 
-import com.divyajyoti.group_management.dtos.UserDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +16,7 @@ public class GroupModel {
 
     private String name;
 
-    private List<UserDto> members;
+    private List<UserModel> members;
 
     private String createdByContact;
 

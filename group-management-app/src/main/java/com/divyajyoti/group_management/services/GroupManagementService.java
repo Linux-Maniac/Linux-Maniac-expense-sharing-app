@@ -1,16 +1,16 @@
 package com.divyajyoti.group_management.services;
 
 import com.divyajyoti.group_management.dtos.GroupDto;
-import com.divyajyoti.group_management.dtos.UserDto;
-import com.divyajyoti.group_management.entities.UserEntity;
 import com.divyajyoti.group_management.dtos.ResponseStatusDto;
+import com.divyajyoti.group_management.dtos.UserDto;
 import com.divyajyoti.group_management.entities.GroupEntity;
+import com.divyajyoti.group_management.entities.UserEntity;
+import com.divyajyoti.group_management.models.GroupModel;
 import com.divyajyoti.group_management.models.UserModel;
 import com.divyajyoti.group_management.repositories.GroupEntityRepository;
 import com.divyajyoti.group_management.repositories.UserEntityRepository;
 import com.divyajyoti.group_management.rests.exceptions.GenericRestException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -38,22 +38,22 @@ public class GroupManagementService {
         Optional<GroupEntity> optionalGroupEntity;
         boolean conflictionGroupFlag = Boolean.FALSE;
         StringBuilder conflictingUserNames = new StringBuilder();
-        for(UserDto memberData : groupData.getMembers()){
+        for (UserDto memberData : groupData.getMembers()) {
             try {
                 optionalGroupEntity = groupEntityRepository.findGroupByMemberContact(memberData.getContact(), setGroupName);
             } catch (Exception e) {
                 log.error("DATABASE_ERR_IN_FETCHING_EXISTING_GROUP_INFO: {}", e.getMessage());
                 throw new GenericRestException("DATABASE ERROR, PLEASE TRY LATER!", HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            if(optionalGroupEntity.isPresent()){
+            if (optionalGroupEntity.isPresent()) {
                 GroupEntity foundGroupEntity = optionalGroupEntity.get();
-                if(foundGroupEntity.getName().equals(setGroupName)){
+                if (foundGroupEntity.getName().equals(setGroupName)) {
                     conflictionGroupFlag = Boolean.TRUE;
                     conflictingUserNames.append(memberData.getName()).append(" ");
                 }
             }
         }
-        if(conflictionGroupFlag)
+        if (conflictionGroupFlag)
             throw new GenericRestException("ERR: SAME GROUP NAME ALREADY EXISTS FOR USERS: " + conflictingUserNames, HttpStatus.BAD_REQUEST);
         GroupEntity groupEntityData = getGroupEntity(groupData);
         GroupEntity savedGroupEntity;
@@ -66,23 +66,25 @@ public class GroupManagementService {
         List<UserModel> groupMembersList = getUserModels(savedGroupEntity);
         Map<String, Object> details = new HashMap<>();
         details.put("membersCount", groupMembersList.size());
-        details.put("groupMembers", groupMembersList);
-        return new ResponseStatusDto("SUCCESS", "GROUP SUCCESSFULLY CREATED!", details);
+        GroupModel createdGroupModel = new GroupModel(savedGroupEntity.getId(), savedGroupEntity.getName()
+                , groupMembersList, groupData.getCreatedByContact());
+        details.put("newGroupDetails", createdGroupModel);
+        return new ResponseStatusDto("SUCCESS", "NEW GROUP SUCCESSFULLY CREATED!", details);
     }
 
     private GroupEntity getGroupEntity(GroupDto groupData) {
         GroupEntity groupEntityData = new GroupEntity();
         groupEntityData.setName(groupData.getName());
         List<UserEntity> membersDataList = new ArrayList<>();
-        for(UserDto userData : groupData.getMembers()){
+        for (UserDto userData : groupData.getMembers()) {
             Optional<UserEntity> optionalUserEntity;
-            try{
+            try {
                 optionalUserEntity = userEntityRepository.findByContact(userData.getContact());
-            } catch (Exception e){
+            } catch (Exception e) {
                 log.error("DATABASE ERROR IN FETCHING USER DETAILS: {}", e.getMessage());
                 throw new GenericRestException("SERVER ERROR IN FETCHING USER DETAILS", HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            if(optionalUserEntity.isEmpty())
+            if (optionalUserEntity.isEmpty())
                 throw new GenericRestException("USER DOES NOT EXIST: " + userData.getName(), HttpStatus.BAD_REQUEST);
             membersDataList.add(optionalUserEntity.get());
         }
@@ -92,14 +94,14 @@ public class GroupManagementService {
 
     public ResponseStatusDto getGroupMembers(BigInteger id) {
         Optional<GroupEntity> optionalGroupEntity;
-        try{
+        try {
             log.info("EXECUTING GROUP FETCH QUERY");
             optionalGroupEntity = groupEntityRepository.findById(id);
         } catch (Exception e) {
             log.error("ERR_WHILE_FETCHING_GROUP_DATA_FROM_DATABASE: {}", e.getMessage());
             throw new GenericRestException("DATABASE ERROR, UNABLE TO FETCH GROUP DATA", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if(optionalGroupEntity.isEmpty())
+        if (optionalGroupEntity.isEmpty())
             throw new GenericRestException("ERROR: GROUP DOES NOT EXISTS!", HttpStatus.NOT_FOUND);
         Map<String, Object> details = new HashMap<>();
         List<UserModel> groupMembersList = getUserModels(optionalGroupEntity.get());
@@ -128,22 +130,22 @@ public class GroupManagementService {
 
     public ResponseStatusDto addMember(UserDto memberData, BigInteger id) {
         Optional<GroupEntity> optionalGroupEntity;
-        try{
+        try {
             optionalGroupEntity = groupEntityRepository.findById(id);
         } catch (Exception e) {
             log.error("ERR_WHILE_FETCHING_GROUP_DATA_FROM_DATABASE: {}", e.getMessage());
             throw new GenericRestException("DATABASE ERROR, UNABLE TO FETCH GROUP DATA", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if(optionalGroupEntity.isEmpty())
+        if (optionalGroupEntity.isEmpty())
             throw new GenericRestException("ERROR: GROUP DOES NOT EXISTS!", HttpStatus.BAD_REQUEST);
         Optional<UserEntity> optionalUser;
-        try{
+        try {
             optionalUser = userEntityRepository.findByContact(memberData.getContact());
         } catch (Exception e) {
             log.error("ERR_WHILE_FETCHING_USER_DATA_FROM_DATABASE: {}", e.getMessage());
             throw new GenericRestException("DATABASE ERROR, UNABLE TO FETCH USER DATA", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if(optionalUser.isEmpty())
+        if (optionalUser.isEmpty())
             throw new GenericRestException("ERROR: ATTEMPTED USER DOES NOT EXIST!", HttpStatus.BAD_REQUEST);
         GroupEntity existingGroupEntity = optionalGroupEntity.get();
         UserEntity newMemberEntity = optionalUser.get();
@@ -165,7 +167,7 @@ public class GroupManagementService {
         updatedGroupDto.setName(updatedGroupEntity.getName());
         updatedGroupDto.setMembers(updatedGroupUserDtos);
         UserDto groupUserDto;
-        for(UserEntity updatedGroupUserEntity : updatedGroupEntity.getMembers()){
+        for (UserEntity updatedGroupUserEntity : updatedGroupEntity.getMembers()) {
             groupUserDto = new UserDto(updatedGroupUserEntity.getName()
                     , updatedGroupUserEntity.getContact(), updatedGroupUserEntity.getEmail());
             updatedGroupUserDtos.add(groupUserDto);
@@ -175,21 +177,21 @@ public class GroupManagementService {
 
     public ResponseStatusDto removeMember(UserDto memberData, BigInteger id) {
         Optional<GroupEntity> optionalGroupEntity;
-        try{
+        try {
             optionalGroupEntity = groupEntityRepository.findById(id);
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("DATABASE_FETCH_ERR_FOR_GROUP_DATA: {}", e.getMessage());
             throw new GenericRestException("ERROR WHILE FETCHING GROUP DETAILS", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if(optionalGroupEntity.isEmpty())
+        if (optionalGroupEntity.isEmpty())
             throw new GenericRestException("GROUP DOES NOT EXIST", HttpStatus.BAD_REQUEST);
         GroupEntity foundGroupEntity = optionalGroupEntity.get();
         List<UserEntity> foundUserEntities = foundGroupEntity.getMembers();
         foundUserEntities.removeIf(memberEntity -> memberEntity.getContact().equals(memberData.getContact()));
         GroupEntity updatedGroupEntity;
-        try{
+        try {
             updatedGroupEntity = groupEntityRepository.save(foundGroupEntity);
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("DATA_ERROR_WHILE_DELETING_MEMBER_IN_GROUP: {}", e.getMessage());
             throw new GenericRestException("SERVER ERROR WHILE DELETING MEMBER IN GROUP", HttpStatus.INTERNAL_SERVER_ERROR);
         }
