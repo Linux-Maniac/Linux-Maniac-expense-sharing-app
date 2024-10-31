@@ -1,15 +1,16 @@
 package com.divyajyoti.expense_management.models.expense.abstract_classes;
 
-import com.divyajyoti.expense_management.dtos.UserDto;
-import com.divyajyoti.expense_management.entities.GroupEntity;
-import com.divyajyoti.expense_management.entities.UserEntity;
-import com.divyajyoti.expense_management.entities.UserExpenseMappingEntity;
+import com.divyajyoti.expense_management.constants.SplitType;
+import com.divyajyoti.expense_management.models.split.GroupModel;
+import com.divyajyoti.expense_management.models.split.UserModel;
 import com.divyajyoti.expense_management.models.split.abstract_classes.SplitModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.List;
 
 @Data
@@ -17,27 +18,30 @@ import java.util.List;
 @AllArgsConstructor
 public abstract class ExpenseModel implements Serializable {
 
+    private BigInteger id;
+
     private String description;
 
-    private double amount;
+    private Double totalAmount;
 
-    private List<UserExpenseMappingEntity> userExpenseMappingEntityList;
+    private SplitType splitType;
 
-    private GroupEntity groupEntity;
+    private GroupModel group;
 
-    private UserEntity userEntity;
+    private List<SplitModel> splitDetails;
 
-    private List<SplitModel> splitModelList;
+    private UserModel paidBy;
 
-    private UserDto paidBy;
+    private Boolean isSettled;
 
-    public ExpenseModel(String description, double amount, UserDto paidBy, List<SplitModel> splitModelList) {
+    public ExpenseModel(String description, double amount, UserModel paidBy, List<SplitModel> splitDetails) {
         this.description = description;
-        this.amount = amount;
+        this.totalAmount = amount;
         this.paidBy = paidBy;
-        this.splitModelList = splitModelList;
+        this.splitDetails = splitDetails;
     }
 
+    @JsonIgnore
     public abstract boolean isValid();
 
-};
+}

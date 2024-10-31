@@ -1,6 +1,5 @@
 package com.divyajyoti.expense_management.dtos;
 
-import com.divyajyoti.expense_management.constants.ExpenseType;
 import com.divyajyoti.expense_management.constants.SplitType;
 import com.divyajyoti.expense_management.models.split.extends_classes.GenericSplitModel;
 import lombok.AllArgsConstructor;

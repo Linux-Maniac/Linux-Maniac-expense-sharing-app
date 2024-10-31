@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 import java.util.List;
 
@@ -28,5 +29,18 @@ public class ExpenseEntity extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "GROUP_ID")
     private GroupEntity groupEntity;
+
+    @Column(name = "IS_SETTLED", nullable = false)
+    private String isSettled = "FALSE"; // Default value as a string
+
+    // Method to get the boolean representation
+    public Boolean getIsSettledAsBoolean() {
+        return "TRUE".equalsIgnoreCase(isSettled);
+    }
+
+    // Method to set the boolean value
+    public void setIsSettledFromBoolean(Boolean settled) {
+        this.isSettled = settled != null && settled ? "TRUE" : "FALSE";
+    }
 
 }
