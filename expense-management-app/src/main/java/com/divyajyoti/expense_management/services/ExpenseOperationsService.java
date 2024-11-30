@@ -13,8 +13,8 @@ import com.divyajyoti.expense_management.models.expense.abstract_classes.Expense
 import com.divyajyoti.expense_management.models.expense.extends_classes.EqualExpenseModel;
 import com.divyajyoti.expense_management.models.expense.extends_classes.ExactExpenseModel;
 import com.divyajyoti.expense_management.models.expense.extends_classes.PercentExpenseModel;
-import com.divyajyoti.expense_management.models.split.GroupModel;
-import com.divyajyoti.expense_management.models.split.UserModel;
+import com.divyajyoti.expense_management.models.GroupModel;
+import com.divyajyoti.expense_management.models.UserModel;
 import com.divyajyoti.expense_management.models.split.abstract_classes.SplitModel;
 import com.divyajyoti.expense_management.models.split.extends_classes.EqualSplitModel;
 import com.divyajyoti.expense_management.models.split.extends_classes.ExactSplitModel;
@@ -29,20 +29,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.util.*;
 
 @Slf4j
 @Service
-public class ExpenseCreationService {
+public class ExpenseOperationsService {
 
     private final ExpenseEntityRepository expenseEntityRepository;
     private final UserEntityRepository userEntityRepository;
     private final GroupEntityRepository groupEntityRepository;
 
     @Autowired
-    public ExpenseCreationService(ExpenseEntityRepository expenseEntityRepository,
-                                  UserEntityRepository userEntityRepository,
-                                  GroupEntityRepository groupEntityRepository) {
+    public ExpenseOperationsService(ExpenseEntityRepository expenseEntityRepository,
+                                    UserEntityRepository userEntityRepository,
+                                    GroupEntityRepository groupEntityRepository) {
         this.expenseEntityRepository = expenseEntityRepository;
         this.userEntityRepository = userEntityRepository;
         this.groupEntityRepository = groupEntityRepository;
@@ -147,7 +148,8 @@ public class ExpenseCreationService {
 
             UserExpenseMappingEntity userExpenseMappingEntity = new UserExpenseMappingEntity();
             if (fetchedUserEntity.getContact().equals(paidByUserModel.getContact())) {
-                userExpenseMappingEntity.setExpenseType(ExpenseType.PAID_BY);
+                providedExpenseEntity.setPaidByUserEntity(fetchedUserEntity);
+                userExpenseMappingEntity.setExpenseType(ExpenseType.SELF_PAID);
                 userExpenseMappingEntity.setAmount(expenseModel.getTotalAmount());
                 paidByUserModel.setId(fetchedUserEntity.getId());
             } else {
@@ -174,6 +176,39 @@ public class ExpenseCreationService {
             log.error("ERROR WHILE SAVING EXPENSE DETAILS INTO DATABASE: {}", e.getMessage());
             throw new GenericRestException("SERVER ERROR WHILE SAVING EXPENSE DETAILS", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public ResponseStatusDto setGroupExpensesToSettled(BigInteger groupId) {
+        List<ExpenseEntity> expenseEntityList;
+        ResponseStatusDto responseStatusDto = null;
+
+        try {
+            log.info("FETCHING EXPENSE IN GROUP ID: {}", groupId);
+            expenseEntityList = expenseEntityRepository.findNonSettledExpensesByGroupEntity_Id(groupId);
+            log.info("FETCHED TOTAL EXPENSES NO: {}", expenseEntityList.size());
+        } catch (Exception e) {
+            log.error("DATABASE ERROR WHILE FETCHING EXPENSE DETAILS: {}", e.getMessage());
+            throw new GenericRestException("SERVER ERROR WHILE FETCHING EXPENSE DETAILS", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        if (expenseEntityList.isEmpty()) {
+            throw new GenericRestException("CANNOT PERFORM SETTLEMENT IN GROUP AS CURRENTLY NO UNSETTLED EXPENSES IN GROUP", HttpStatus.CONFLICT);
+
+        }
+
+        for (ExpenseEntity expense : expenseEntityList)
+            expense.setIsSettled("TRUE");
+        try {
+            expenseEntityRepository.saveAll(expenseEntityList);
+        } catch (Exception e) {
+            log.error("DATABASE ERROR WHILE SETTING GROUP EXPENSES TO SETTLED: {}", e.getMessage());
+            throw new GenericRestException("SERVER ERROR WHILE SETTING GROUP EXPENSES TO SETTLED", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        responseStatusDto = new ResponseStatusDto();
+        responseStatusDto.setStatus("SUCCESS");
+        responseStatusDto.setDetails("ALL GROUP EXPENSES HAVE BEEN SET TO SETTLED");
+        return responseStatusDto;
     }
 
 }

@@ -1,9 +1,8 @@
 package com.divyajyoti.expense_management.models.expense.extends_classes;
 
 import com.divyajyoti.expense_management.constants.SplitType;
-import com.divyajyoti.expense_management.dtos.UserDto;
 import com.divyajyoti.expense_management.models.expense.abstract_classes.ExpenseModel;
-import com.divyajyoti.expense_management.models.split.UserModel;
+import com.divyajyoti.expense_management.models.UserModel;
 import com.divyajyoti.expense_management.models.split.abstract_classes.SplitModel;
 import com.divyajyoti.expense_management.models.split.extends_classes.ExactSplitModel;
 import lombok.Data;

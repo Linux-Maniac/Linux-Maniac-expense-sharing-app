@@ -1,8 +1,8 @@
 package com.divyajyoti.expense_management.models.expense.abstract_classes;
 
 import com.divyajyoti.expense_management.constants.SplitType;
-import com.divyajyoti.expense_management.models.split.GroupModel;
-import com.divyajyoti.expense_management.models.split.UserModel;
+import com.divyajyoti.expense_management.models.GroupModel;
+import com.divyajyoti.expense_management.models.UserModel;
 import com.divyajyoti.expense_management.models.split.abstract_classes.SplitModel;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;

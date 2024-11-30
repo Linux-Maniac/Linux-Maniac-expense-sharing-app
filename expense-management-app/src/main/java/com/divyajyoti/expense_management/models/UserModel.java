@@ -1,6 +1,5 @@
-package com.divyajyoti.expense_management.models.split;
+package com.divyajyoti.expense_management.models;
 
-import com.divyajyoti.expense_management.entities.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,12 +10,16 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroupModel {
+public class UserModel {
 
     private BigInteger id;
 
     private String name;
 
-    private List<UserEntity> members;
+    private String contact;
+
+    private String email;
+
+    private List<GroupModel> memberOfGroups;
 
 }

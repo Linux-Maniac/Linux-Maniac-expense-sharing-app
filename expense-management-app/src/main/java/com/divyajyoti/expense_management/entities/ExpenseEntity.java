@@ -30,6 +30,10 @@ public class ExpenseEntity extends BaseEntity{
     @JoinColumn(name = "GROUP_ID")
     private GroupEntity groupEntity;
 
+    @ManyToOne
+    @JoinColumn(name = "PAYEE_USER_ID")
+    private UserEntity paidByUserEntity;
+
     @Column(name = "IS_SETTLED", nullable = false)
     private String isSettled = "FALSE"; // Default value as a string
 
