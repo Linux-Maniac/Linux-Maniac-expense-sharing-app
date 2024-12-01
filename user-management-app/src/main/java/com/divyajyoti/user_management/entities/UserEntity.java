@@ -29,7 +29,10 @@ public class UserEntity extends BaseEntity implements Serializable {
     @Column(name = "USER_EMAIL")
     private String email;
 
-    @ManyToMany(mappedBy = "members")
-    private List<GroupEntity> groupsMemberList;
+    @Column(name = "FIRST_NAME")
+    private String firstName;
+
+    @Column(name = "LAST_NAME")
+    private String lastName;
 
 }

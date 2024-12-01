@@ -13,6 +13,8 @@ public class ResponseStatusDto implements Serializable {
 
     private String status;
 
+    private String message;
+
     private Object details;
 
 }

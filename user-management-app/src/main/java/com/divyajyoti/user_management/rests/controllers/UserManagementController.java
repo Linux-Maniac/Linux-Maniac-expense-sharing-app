@@ -3,13 +3,16 @@ package com.divyajyoti.user_management.rests.controllers;
 import com.divyajyoti.user_management.dtos.ResponseStatusDto;
 import com.divyajyoti.user_management.dtos.UserDto;
 import com.divyajyoti.user_management.services.UserManagementService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
+import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/user-management")
 public class UserManagementController {
@@ -37,6 +40,18 @@ public class UserManagementController {
     public ResponseEntity<ResponseStatusDto> getUserDetails(@PathVariable BigInteger id){
         ResponseStatusDto responseStatusDto = userManagementService.getUserDetails(id);
         return new ResponseEntity<>(responseStatusDto, HttpStatus.FOUND);
+    }
+
+    @PostMapping("/user-details-list/by-contact")
+    public ResponseEntity<ResponseStatusDto> getUserDetailsListByContacts(@RequestBody List<String> contactsList){
+        log.info("INVOKED USER_MANAGEMENT_GET_USER_DETAILS_BY_CONTACT_CONTROLLER");
+        ResponseStatusDto responseStatusDto = userManagementService.getUserDetailsListByContacts(contactsList);
+        return new ResponseEntity<>(responseStatusDto, HttpStatus.FOUND);
+    }
+
+    @DeleteMapping("/delete-user/{id}")
+    public ResponseEntity<ResponseStatusDto> deleteUser(@PathVariable BigInteger id){
+        return null;
     }
 
 }

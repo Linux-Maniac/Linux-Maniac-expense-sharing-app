@@ -12,6 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -45,7 +48,7 @@ public class UserManagementService {
         } catch (Exception e) {
             throw new GenericRestException("ERROR WHILE SAVING INFO INTO DATABASE!", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseStatusDto("USER CREATION SUCCESSFUL", savedUser);
+        return new ResponseStatusDto("SUCCESS", "USER CREATION SUCCESSFUL", savedUser);
     }
 
     @CachePut(value = "expense-sharing-user-management", key = "(#userData.name + '-' + #userData.contact).toUpperCase()")
@@ -64,29 +67,48 @@ public class UserManagementService {
         newUser.setContact(userData.getContact());
         newUser.setName(userData.getName());
         newUser.setEmail(userData.getEmail());
+        newUser.setFirstName(userData.getFirstName());
+        newUser.setLastName(userData.getLastName());
         UserEntity savedUser;
         try {
             savedUser = userEntityRepository.save(newUser);
         } catch (Exception e) {
             throw new GenericRestException("ERROR WHILE UPDATING INFO INTO DATABASE!", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseStatusDto("USER DETAILS UPDATED", savedUser);
+        return new ResponseStatusDto("SUCCESS", "USER DETAILS UPDATED", savedUser);
     }
 
     public ResponseStatusDto getUserDetails(BigInteger id) {
         Optional<UserEntity> optionalUser;
-        try{
+        try {
             optionalUser = userEntityRepository.findById(id);
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("DATABASE ERROR WHILE GETTING USER DATA: {}", e.getMessage());
             throw new GenericRestException("SERVER ERROR WHILE GETTING USER DATA: {}", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if(optionalUser.isEmpty())
+        if (optionalUser.isEmpty())
             throw new GenericRestException("USER DOES NOT EXIST: {}", HttpStatus.NOT_FOUND);
         UserEntity foundUserEntity = optionalUser.get();
-        UserDto userDto = new UserDto(foundUserEntity.getName(),
-                foundUserEntity.getContact(), foundUserEntity.getEmail());
-        return new ResponseStatusDto("SUCCESS", userDto);
+        UserDto userDto = new UserDto(foundUserEntity.getName()
+                , foundUserEntity.getContact(), foundUserEntity.getEmail()
+                , foundUserEntity.getFirstName(), foundUserEntity.getLastName());
+        return new ResponseStatusDto("SUCCESS", "USER DETAILS SUCCESSFULLY FETCHED", userDto);
     }
 
+    public ResponseStatusDto getUserDetailsListByContacts(List<String> contactsList) {
+        log.info("INVOKED USER_MANAGEMENT_GET_USER_DETAILS_BY_CONTACT_SERVICE");
+        List<UserEntity> userEntityList;
+        try {
+            userEntityList = userEntityRepository.findUsersListByContacts(contactsList);
+        } catch (Exception e) {
+            log.error("DATABASE ERROR WHILE GETTING USERS DATA: {}", e.getMessage());
+            throw new GenericRestException("SERVER ERROR WHILE GETTING USERS DATA: {}", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        if (userEntityList.isEmpty())
+            throw new GenericRestException("USERS DO NOT EXIST: {}", HttpStatus.NOT_FOUND);
+        Map<String, Object> details = new HashMap<>();
+        details.put("usersList", userEntityList);
+        details.put("totalRecords", userEntityList.size());
+        return new ResponseStatusDto("SUCCESS", "USERS DETAILS SUCCESSFULLY FETCHED", details);
+    }
 }
