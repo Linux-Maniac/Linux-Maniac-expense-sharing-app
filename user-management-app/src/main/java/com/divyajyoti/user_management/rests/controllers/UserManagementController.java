@@ -44,8 +44,13 @@ public class UserManagementController {
 
     @PostMapping("/user-details-list/by-contact")
     public ResponseEntity<ResponseStatusDto> getUserDetailsListByContacts(@RequestBody List<String> contactsList){
-        log.info("INVOKED USER_MANAGEMENT_GET_USER_DETAILS_BY_CONTACT_CONTROLLER");
         ResponseStatusDto responseStatusDto = userManagementService.getUserDetailsListByContacts(contactsList);
+        return new ResponseEntity<>(responseStatusDto, HttpStatus.FOUND);
+    }
+
+    @PostMapping("/user-details-list/by-id")
+    public ResponseEntity<ResponseStatusDto> getUserDetailsListByIds(@RequestBody List<String> idsList){
+        ResponseStatusDto responseStatusDto = userManagementService.getUserDetailsListByIds(idsList);
         return new ResponseEntity<>(responseStatusDto, HttpStatus.FOUND);
     }
 

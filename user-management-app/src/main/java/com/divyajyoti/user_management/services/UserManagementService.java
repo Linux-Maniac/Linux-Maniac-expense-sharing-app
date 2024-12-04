@@ -42,6 +42,8 @@ public class UserManagementService {
         newUser.setContact(userData.getContact());
         newUser.setName(userData.getName());
         newUser.setEmail(userData.getEmail());
+        newUser.setFirstName(userData.getFirstName());
+        newUser.setLastName(userData.getLastName());
         UserEntity savedUser;
         try {
             savedUser = userEntityRepository.save(newUser);
@@ -96,7 +98,6 @@ public class UserManagementService {
     }
 
     public ResponseStatusDto getUserDetailsListByContacts(List<String> contactsList) {
-        log.info("INVOKED USER_MANAGEMENT_GET_USER_DETAILS_BY_CONTACT_SERVICE");
         List<UserEntity> userEntityList;
         try {
             userEntityList = userEntityRepository.findUsersListByContacts(contactsList);
@@ -104,8 +105,20 @@ public class UserManagementService {
             log.error("DATABASE ERROR WHILE GETTING USERS DATA: {}", e.getMessage());
             throw new GenericRestException("SERVER ERROR WHILE GETTING USERS DATA: {}", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if (userEntityList.isEmpty())
-            throw new GenericRestException("USERS DO NOT EXIST: {}", HttpStatus.NOT_FOUND);
+        Map<String, Object> details = new HashMap<>();
+        details.put("usersList", userEntityList);
+        details.put("totalRecords", userEntityList.size());
+        return new ResponseStatusDto("SUCCESS", "USERS DETAILS SUCCESSFULLY FETCHED", details);
+    }
+
+    public ResponseStatusDto getUserDetailsListByIds(List<String> idsList) {
+        List<UserEntity> userEntityList;
+        try {
+            userEntityList = userEntityRepository.findUsersListByIds(idsList);
+        } catch (Exception e) {
+            log.error("DATABASE ERROR WHILE GETTING USERS DATA: {}", e.getMessage());
+            throw new GenericRestException("SERVER ERROR WHILE GETTING USERS DATA: {}", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         Map<String, Object> details = new HashMap<>();
         details.put("usersList", userEntityList);
         details.put("totalRecords", userEntityList.size());

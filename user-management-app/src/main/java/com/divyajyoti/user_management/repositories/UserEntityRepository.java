@@ -18,4 +18,7 @@ public interface UserEntityRepository extends JpaRepository<UserEntity, BigInteg
     @Query("SELECT u FROM UserEntity u WHERE u.contact IN :contactsList")
     public List<UserEntity> findUsersListByContacts(@Param("contactsList") List<String> contactsList);
 
+    @Query("SELECT u FROM UserEntity u WHERE u.id IN :idsList")
+    public List<UserEntity> findUsersListByIds(@Param("idsList") List<String> idsList);
+
 }
