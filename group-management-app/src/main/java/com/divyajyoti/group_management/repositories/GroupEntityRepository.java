@@ -11,12 +11,4 @@ import java.util.Optional;
 
 @Repository
 public interface GroupEntityRepository extends JpaRepository<GroupEntity, BigInteger> {
-
-    //public List<UserDto> findAllMembers(BigInteger id);
-
-    public Optional<GroupEntity> findByName(String name);
-
-    @Query("SELECT g FROM GroupEntity g JOIN g.members u WHERE u.contact = :contact AND g.name = :groupName")
-    public Optional<GroupEntity> findGroupByMemberContact(@Param("contact") String contact, @Param("groupName") String groupName);
-
 }

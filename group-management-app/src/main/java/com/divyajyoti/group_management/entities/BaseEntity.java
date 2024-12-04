@@ -27,7 +27,7 @@ public class BaseEntity implements Serializable {
 
     @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "CREATED_BY")
+    @Column(name = "UPDATED_AT")
     private LocalDateTime lastModifiedAt;
 
 }

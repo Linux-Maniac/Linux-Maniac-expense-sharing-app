@@ -10,7 +10,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroupDto {
+public class GroupResponseDto {
+
+    private BigInteger id;
 
     private String name;
 

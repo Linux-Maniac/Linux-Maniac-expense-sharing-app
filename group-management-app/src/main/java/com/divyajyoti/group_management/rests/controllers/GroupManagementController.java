@@ -1,6 +1,6 @@
 package com.divyajyoti.group_management.rests.controllers;
 
-import com.divyajyoti.group_management.dtos.GroupDto;
+import com.divyajyoti.group_management.dtos.GroupRequestDto;
 import com.divyajyoti.group_management.dtos.ResponseStatusDto;
 import com.divyajyoti.group_management.dtos.UserDto;
 import com.divyajyoti.group_management.services.GroupManagementService;
@@ -18,30 +18,30 @@ public class GroupManagementController {
     private final GroupManagementService groupManagementService;
 
     @Autowired
-    public GroupManagementController(GroupManagementService groupManagementService){
+    public GroupManagementController(GroupManagementService groupManagementService) {
         this.groupManagementService = groupManagementService;
     }
 
     @PutMapping("/new-group")
-    public ResponseEntity<?> createGroup(@RequestBody GroupDto groupData){
+    public ResponseEntity<?> createGroup(@RequestBody GroupRequestDto groupData) {
         ResponseStatusDto responseStatusDto = groupManagementService.createGroup(groupData);
         return new ResponseEntity<>(responseStatusDto, HttpStatus.CREATED);
     }
 
     @GetMapping("/group-members/{id}")
-    public ResponseEntity<?> getGroupMembers(@PathVariable BigInteger id){
+    public ResponseEntity<?> getGroupMembers(@PathVariable BigInteger id) {
         ResponseStatusDto responseStatusDto = groupManagementService.getGroupMembers(id);
         return new ResponseEntity<>(responseStatusDto, HttpStatus.FOUND);
     }
 
     @PostMapping("/new-member/{id}")
-    public ResponseEntity<?> addMember(@RequestBody UserDto memberData, @PathVariable BigInteger id){
+    public ResponseEntity<?> addMember(@RequestBody UserDto memberData, @PathVariable BigInteger id) {
         ResponseStatusDto responseStatusDto = groupManagementService.addMember(memberData, id);
         return new ResponseEntity<>(responseStatusDto, HttpStatus.OK);
     }
 
     @DeleteMapping("/remove-member/{id}")
-    public ResponseEntity<?> removeMember(@RequestBody UserDto memberData, @PathVariable BigInteger id){
+    public ResponseEntity<?> removeMember(@RequestBody UserDto memberData, @PathVariable BigInteger id) {
         ResponseStatusDto responseStatusDto = groupManagementService.removeMember(memberData, id);
         return new ResponseEntity<>(responseStatusDto, HttpStatus.OK);
     }

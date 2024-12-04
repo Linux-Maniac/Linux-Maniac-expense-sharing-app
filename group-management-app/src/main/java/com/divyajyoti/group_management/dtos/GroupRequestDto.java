@@ -4,19 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDto {
+public class GroupRequestDto {
 
     private String name;
 
-    private String contact;
+    private List<UserDto> members;
 
-    private String email;
-
-    private String firstName;
-
-    private String lastName;
+    private String createdByContact;
 
 }
