@@ -3,18 +3,20 @@ package com.divyajyoti.expense_management.services;
 import com.divyajyoti.expense_management.constants.ExpenseType;
 import com.divyajyoti.expense_management.dtos.ResponseStatusDto;
 import com.divyajyoti.expense_management.entities.ExpenseEntity;
-import com.divyajyoti.expense_management.entities.UserEntity;
 import com.divyajyoti.expense_management.entities.UserExpenseMappingEntity;
-import com.divyajyoti.expense_management.models.PaymentModel;
+import com.divyajyoti.expense_management.models.GetUsersListFromUserServiceRespModel;
+import com.divyajyoti.expense_management.models.GroupModel;
 import com.divyajyoti.expense_management.models.UserModel;
 import com.divyajyoti.expense_management.models.UserShareMappingModel;
 import com.divyajyoti.expense_management.repositories.ExpenseEntityRepository;
-import com.divyajyoti.expense_management.repositories.UserEntityRepository;
 import com.divyajyoti.expense_management.repositories.UserExpenseMappingEntityRepository;
 import com.divyajyoti.expense_management.rests.exceptions.GenericRestException;
+import com.divyajyoti.expense_management.utilities.CommonServices;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -28,14 +30,15 @@ public class ExpenseSettlementService {
 
     private final UserExpenseMappingEntityRepository userExpenseMappingEntityRepository;
 
-    private final UserEntityRepository userEntityRepository;
+    private final CommonServices commonServices;
 
     @Autowired
     public ExpenseSettlementService(ExpenseEntityRepository expenseEntityRepository
-            , UserExpenseMappingEntityRepository userExpenseMappingEntityRepository, UserEntityRepository userEntityRepository) {
+            , UserExpenseMappingEntityRepository userExpenseMappingEntityRepository
+            ,CommonServices commonServices) {
         this.expenseEntityRepository = expenseEntityRepository;
         this.userExpenseMappingEntityRepository = userExpenseMappingEntityRepository;
-        this.userEntityRepository = userEntityRepository;
+        this.commonServices = commonServices;
     }
 
     public ResponseStatusDto getSettlementInGroup(BigInteger groupId) {
@@ -62,16 +65,22 @@ public class ExpenseSettlementService {
 
         // Process expenses and update user balances
         for (ExpenseEntity expenseEntity : expenseEntityList) {
-            UserEntity paidByUserEntity = expenseEntity.getPaidByUserEntity();
-            String paidByContact = paidByUserEntity.getContact();
+
+            ResponseEntity<?> response = commonServices.makeRestCall("http://localhost:8081/user-management/group-details/{id}",
+                    HttpMethod.GET, expenseEntity.getPaidByUserId(), UserModel.class);
+
+            if(response.getStatusCode().is4xxClientError())
+                throw new GenericRestException("DATA ERROR", HttpStatus.BAD_REQUEST);
+
+            @SuppressWarnings("unchecked")
+            ResponseEntity<UserModel> typedResponse = (ResponseEntity<UserModel>) response;
+
+            UserModel paidByUserModel = typedResponse.getBody();
+            String paidByContact = paidByUserModel.getContact();
 
             // Ensure user is added only once to the userModelList
             if (!userContactsBalancesMap.containsKey(paidByContact)) {
-                UserModel payerUserModel = new UserModel();
-                payerUserModel.setId(paidByUserEntity.getId());
-                payerUserModel.setContact(paidByUserEntity.getContact());
-                payerUserModel.setName(paidByUserEntity.getName());
-                userModelList.add(payerUserModel);
+                userModelList.add(paidByUserModel);
             }
 
             // Update balance for the user who paid
@@ -82,15 +91,20 @@ public class ExpenseSettlementService {
                 if (userExpenseMappingEntity.getExpenseType() == ExpenseType.SELF_PAID)
                     continue;
 
-                UserEntity payeeUserEntity = userExpenseMappingEntity.getUserEntity();
-                String payeeContact = payeeUserEntity.getContact();
+                ResponseEntity<?> getPayeeResponse = commonServices.makeRestCall("http://localhost:8081/user-management/group-details/{id}",
+                        HttpMethod.GET, userExpenseMappingEntity.getUserId(), UserModel.class);
+
+                if(response.getStatusCode().is4xxClientError())
+                    throw new GenericRestException("DATA ERROR", HttpStatus.BAD_REQUEST);
+
+                @SuppressWarnings("unchecked")
+                ResponseEntity<UserModel> getPayeeTypedResponse = (ResponseEntity<UserModel>) getPayeeResponse;
+
+                UserModel payeeUserModel = getPayeeTypedResponse.getBody();
+                String payeeContact = payeeUserModel.getContact();
 
                 // Ensure user is added only once to the userModelList
                 if (!userContactsBalancesMap.containsKey(payeeContact)) {
-                    UserModel payeeUserModel = new UserModel();
-                    payeeUserModel.setId(payeeUserEntity.getId());
-                    payeeUserModel.setContact(payeeUserEntity.getContact());
-                    payeeUserModel.setName(payeeUserEntity.getName());
                     userModelList.add(payeeUserModel);
                 }
 

@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface ExpenseEntityRepository extends JpaRepository<ExpenseEntity, BigInteger> {
 
-    @Query("SELECT e FROM ExpenseEntity e WHERE e.groupEntity.id = :groupId AND e.isSettled = 'FALSE'")
+    @Query("SELECT e FROM ExpenseEntity e WHERE e.groupId = :groupId AND e.isSettled = 'FALSE'")
     public List<ExpenseEntity> findNonSettledExpensesByGroupEntity_Id(BigInteger groupId);
 
 }

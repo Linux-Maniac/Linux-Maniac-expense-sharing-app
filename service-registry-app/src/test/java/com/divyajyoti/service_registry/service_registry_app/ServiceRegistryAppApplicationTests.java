@@ -1,10 +1,10 @@
-package com.divyajyoti.user_management;
+package com.divyajyoti.service_registry.service_registry_app;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class UserManagementApplicationTests {
+class ServiceRegistryAppApplicationTests {
 
 	@Test
 	void contextLoads() {

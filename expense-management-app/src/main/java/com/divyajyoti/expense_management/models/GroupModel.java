@@ -1,6 +1,5 @@
 package com.divyajyoti.expense_management.models;
 
-import com.divyajyoti.expense_management.entities.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +16,8 @@ public class GroupModel {
 
     private String name;
 
-    private List<UserEntity> members;
+    private List<UserModel> members;
+
+    private Integer totalMembers;
 
 }

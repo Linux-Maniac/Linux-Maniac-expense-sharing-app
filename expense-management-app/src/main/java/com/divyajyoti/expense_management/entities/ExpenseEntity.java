@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
 
+import java.math.BigInteger;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -28,11 +29,11 @@ public class ExpenseEntity extends BaseEntity{
 
     @ManyToOne
     @JoinColumn(name = "GROUP_ID")
-    private GroupEntity groupEntity;
+    private BigInteger groupId;
 
     @ManyToOne
-    @JoinColumn(name = "PAYEE_USER_ID")
-    private UserEntity paidByUserEntity;
+    @JoinColumn(name = "PAID_BY_USER_ID")
+    private BigInteger paidByUserId;
 
     @Column(name = "IS_SETTLED", nullable = false)
     private String isSettled = "FALSE"; // Default value as a string

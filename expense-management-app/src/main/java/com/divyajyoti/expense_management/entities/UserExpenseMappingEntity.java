@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.math.BigInteger;
+
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "USER_EXPENSE_RECORDS")
@@ -21,7 +23,7 @@ public class UserExpenseMappingEntity extends BaseEntity{
 
     @ManyToOne
     @JoinColumn(name = "USER_ID")
-    private UserEntity userEntity;
+    private BigInteger userId;
 
     @Column(name = "AMOUNT")
     private double amount;

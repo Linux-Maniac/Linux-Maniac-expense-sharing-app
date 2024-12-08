@@ -6,47 +6,47 @@ import com.divyajyoti.expense_management.dtos.ExpenseDto;
 import com.divyajyoti.expense_management.dtos.ResponseStatusDto;
 import com.divyajyoti.expense_management.dtos.UserDto;
 import com.divyajyoti.expense_management.entities.ExpenseEntity;
-import com.divyajyoti.expense_management.entities.GroupEntity;
-import com.divyajyoti.expense_management.entities.UserEntity;
 import com.divyajyoti.expense_management.entities.UserExpenseMappingEntity;
+import com.divyajyoti.expense_management.models.GetUsersListFromUserServiceRespModel;
+import com.divyajyoti.expense_management.models.GroupModel;
+import com.divyajyoti.expense_management.models.UserModel;
 import com.divyajyoti.expense_management.models.expense.abstract_classes.ExpenseModel;
 import com.divyajyoti.expense_management.models.expense.extends_classes.EqualExpenseModel;
 import com.divyajyoti.expense_management.models.expense.extends_classes.ExactExpenseModel;
 import com.divyajyoti.expense_management.models.expense.extends_classes.PercentExpenseModel;
-import com.divyajyoti.expense_management.models.GroupModel;
-import com.divyajyoti.expense_management.models.UserModel;
 import com.divyajyoti.expense_management.models.split.abstract_classes.SplitModel;
 import com.divyajyoti.expense_management.models.split.extends_classes.EqualSplitModel;
 import com.divyajyoti.expense_management.models.split.extends_classes.ExactSplitModel;
 import com.divyajyoti.expense_management.models.split.extends_classes.GenericSplitModel;
 import com.divyajyoti.expense_management.models.split.extends_classes.PercentSplitModel;
 import com.divyajyoti.expense_management.repositories.ExpenseEntityRepository;
-import com.divyajyoti.expense_management.repositories.GroupEntityRepository;
-import com.divyajyoti.expense_management.repositories.UserEntityRepository;
 import com.divyajyoti.expense_management.rests.exceptions.GenericRestException;
+import com.divyajyoti.expense_management.utilities.CommonServices;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @Service
 public class ExpenseOperationsService {
 
     private final ExpenseEntityRepository expenseEntityRepository;
-    private final UserEntityRepository userEntityRepository;
-    private final GroupEntityRepository groupEntityRepository;
+
+    private final CommonServices commonServices;
 
     @Autowired
-    public ExpenseOperationsService(ExpenseEntityRepository expenseEntityRepository,
-                                    UserEntityRepository userEntityRepository,
-                                    GroupEntityRepository groupEntityRepository) {
+    public ExpenseOperationsService(ExpenseEntityRepository expenseEntityRepository
+            , CommonServices commonServices) {
         this.expenseEntityRepository = expenseEntityRepository;
-        this.userEntityRepository = userEntityRepository;
-        this.groupEntityRepository = groupEntityRepository;
+        this.commonServices = commonServices;
     }
 
     public ResponseStatusDto addExpense(ExpenseDto expenseRequestDto) {
@@ -118,18 +118,27 @@ public class ExpenseOperationsService {
     }
 
     private void saveExpense(ExpenseDto expenseRequestDto, ExpenseModel expenseModel, UserModel paidByUserModel) {
-        GroupEntity expenseGroupEntity = null;
+
+        BigInteger groupId = null;
 
         // Fetch the group entity if a group ID is provided
         if (expenseRequestDto.getGroupId() != null) {
-            expenseGroupEntity = groupEntityRepository.findById(expenseRequestDto.getGroupId())
-                    .orElseThrow(() -> new GenericRestException("GROUP PROVIDED DOES NOT EXIST", HttpStatus.BAD_REQUEST));
+            ResponseEntity<?> response = commonServices.makeRestCall("http://localhost:8081/group-management/group-details/{id}",
+                    HttpMethod.POST, expenseRequestDto.getGroupId(), GroupModel.class);
+
+            if (response.getStatusCode().is4xxClientError())
+                throw new GenericRestException("GROUP DOES NOT EXISTS", HttpStatus.BAD_REQUEST);
+
+            @SuppressWarnings("unchecked")
+            ResponseEntity<GroupModel> typedResponse = (ResponseEntity<GroupModel>) response;
+
+
+            GroupModel groupDetails = typedResponse.getBody();
+            groupId = groupDetails.getId();
 
             // If a group is associated, set the group details in the expense model
-            GroupModel groupModel = new GroupModel();
-            groupModel.setId(expenseGroupEntity.getId());
-            groupModel.setName(expenseGroupEntity.getName());
-            expenseModel.setGroup(groupModel);
+            expenseModel.setGroup(groupDetails);
+
         }
 
         // Prepare the ExpenseEntity
@@ -137,28 +146,36 @@ public class ExpenseOperationsService {
         providedExpenseEntity.setDescription(expenseModel.getDescription());
         providedExpenseEntity.setTotalAmount(expenseModel.getTotalAmount());
         providedExpenseEntity.setIsSettledFromBoolean(expenseModel.getIsSettled());
-        providedExpenseEntity.setGroupEntity(expenseGroupEntity);
+        providedExpenseEntity.setGroupId(groupId);
 
         List<UserExpenseMappingEntity> userExpenseMappingEntityList = new ArrayList<>();
 
         for (SplitModel split : expenseModel.getSplitDetails()) {
-            UserEntity fetchedUserEntity = userEntityRepository.findByContact(split.getUser().getContact())
-                    .orElseThrow(() -> new GenericRestException("USER PROVIDED DOES NOT EXIST: " + split.getUser().getName()
-                            , HttpStatus.INTERNAL_SERVER_ERROR));
+            ResponseEntity<?> response = commonServices.makeRestCall("http://localhost:8081/user-management/group-details/{id}",
+                    HttpMethod.POST, split.getUser().getContact(), GetUsersListFromUserServiceRespModel.class);
+
+            if(response.getStatusCode().value() == 404)
+                throw new GenericRestException("USER PROVIDED DOES NOT EXIST: " + split.getUser().getName()
+                        , HttpStatus.BAD_REQUEST);
+
+            @SuppressWarnings("unchecked")
+            ResponseEntity<GetUsersListFromUserServiceRespModel> typedResponse = (ResponseEntity<GetUsersListFromUserServiceRespModel>) response;
+
+            UserModel fetchedUserModel = typedResponse.getBody().getDetails().getUsersList().getFirst();
 
             UserExpenseMappingEntity userExpenseMappingEntity = new UserExpenseMappingEntity();
-            if (fetchedUserEntity.getContact().equals(paidByUserModel.getContact())) {
-                providedExpenseEntity.setPaidByUserEntity(fetchedUserEntity);
+            if (fetchedUserModel.getContact().equals(paidByUserModel.getContact())) {
+                providedExpenseEntity.setPaidByUserId(fetchedUserModel.getId());
                 userExpenseMappingEntity.setExpenseType(ExpenseType.SELF_PAID);
                 userExpenseMappingEntity.setAmount(expenseModel.getTotalAmount());
-                paidByUserModel.setId(fetchedUserEntity.getId());
+                paidByUserModel.setId(fetchedUserModel.getId());
             } else {
                 userExpenseMappingEntity.setExpenseType(ExpenseType.OWES_IT);
                 userExpenseMappingEntity.setAmount(split.getAmount());
             }
 
             userExpenseMappingEntity.setExpenseEntity(providedExpenseEntity);
-            userExpenseMappingEntity.setUserEntity(fetchedUserEntity);
+            userExpenseMappingEntity.setUserId(fetchedUserModel.getId());
 
             userExpenseMappingEntityList.add(userExpenseMappingEntity);
         }

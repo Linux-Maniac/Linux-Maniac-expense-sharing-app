@@ -20,6 +20,8 @@ public class UserModel {
 
     private String email;
 
-    private List<GroupModel> memberOfGroups;
+    private String firstName;
+
+    private String lastName;
 
 }
