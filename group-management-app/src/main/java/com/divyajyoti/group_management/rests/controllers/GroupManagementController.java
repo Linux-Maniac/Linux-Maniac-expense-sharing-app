@@ -34,6 +34,12 @@ public class GroupManagementController {
         return new ResponseEntity<>(responseStatusDto, HttpStatus.FOUND);
     }
 
+    @GetMapping("/group-details/{id}")
+    public ResponseEntity<?> getGroupDetails(@PathVariable BigInteger id){
+        ResponseStatusDto responseStatusDto = groupManagementService.getGroupDetails(id);
+        return new ResponseEntity<>(responseStatusDto, HttpStatus.FOUND);
+    }
+
     @PostMapping("/new-member/{id}")
     public ResponseEntity<?> addMember(@RequestBody UserDto memberData, @PathVariable BigInteger id) {
         ResponseStatusDto responseStatusDto = groupManagementService.addMember(memberData, id);

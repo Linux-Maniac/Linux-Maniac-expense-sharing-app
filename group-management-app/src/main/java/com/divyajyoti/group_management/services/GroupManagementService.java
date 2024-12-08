@@ -161,7 +161,7 @@ public class GroupManagementService {
                 .collect(Collectors.toList());
 
         // Use the generalized method for any REST call (by ID)
-        ResponseEntity<?> response = makeRestCall("http://localhost:8081/user-management/user-details-list/by-id",
+        ResponseEntity<?> response = makeRestCall("http://USER-MANAGEMENT-APP/user-management/user-details-list/by-id",
                 HttpMethod.POST, userIdsList, GetUsersListFromUserServiceRespModel.class);
 
         if (response.getStatusCode().is5xxServerError())
@@ -183,7 +183,7 @@ public class GroupManagementService {
                 .collect(Collectors.toList());
 
         // Use the generalized method for any REST call (by contact)
-        ResponseEntity<?> response = makeRestCall("http://localhost:8081/user-management/user-details-list/by-contact",
+        ResponseEntity<?> response = makeRestCall("http://USER-MANAGEMENT-APP/user-management/user-details-list/by-contact",
                 HttpMethod.POST, contactsList, GetUsersListFromUserServiceRespModel.class);
 
         if (response.getStatusCode().is5xxServerError())
@@ -228,7 +228,7 @@ public class GroupManagementService {
         List<String> contactList = Collections.singletonList(contact);
 
         // Use the generalized method for any REST call (by contact)
-        ResponseEntity<?> response = makeRestCall("http://localhost:8081/user-management/user-details-list/by-contact",
+        ResponseEntity<?> response = makeRestCall("http://USER-MANAGEMENT-APP/user-management/user-details-list/by-contact",
                 HttpMethod.POST, contactList, GetUsersListFromUserServiceRespModel.class);
 
         if (response.getStatusCode().is5xxServerError())
@@ -295,6 +295,15 @@ public class GroupManagementService {
             log.error("USER NOT FOUND IN GROUP: {} for group ID: {}", user.getContact(), groupEntity.getId());
             throw new GenericRestException("USER NOT A MEMBER OF THE GROUP", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    public ResponseStatusDto getGroupDetails(BigInteger id) {
+
+        try {
+
+        } catch (Exception e) {
+        }
+        return null;
     }
 
 }
