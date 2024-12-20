@@ -1,0 +1,95 @@
+server:
+  port: 8989
+
+spring:
+  application:
+    name: api-gateway-app
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      httpclient:
+        connect-timeout: 20
+        response-timeout: 20s
+        pool:
+          acquire-timeout: 2000000
+      routes:
+        - id: user-management-app-route
+          uri: lb://USER-MANAGEMENT-APP
+          predicates:
+            - Path=/gateway/user-management-app/**
+          filters:
+            - AddRequestHeader=X-Client,web
+            - AddResponseHeader=X-Type,inorganic
+            - RewritePath=/gateway/(?<segment>.*), /${segment}
+            - name: CircuitBreaker
+              args:
+                name: user-management-app
+                fallbackUri: forward:/fallback/user-management-app
+        - id: group-management-app-route
+          uri: lb://GROUP-MANAGEMENT-APP
+          predicates:
+            - Path=/gateway/group-management-app/**
+          filters:
+            - AddRequestHeader=X-Client,web
+            - AddResponseHeader=X-Type,inorganic
+            - RewritePath=/gateway/(?<segment>.*), /${segment}
+            - name: CircuitBreaker
+              args:
+                name: group-management-app
+                fallbackUri: forward:/fallback/group-management-app
+            - name: Retry
+              args:
+                  retries: 4 # Number of retries
+                  statuses: BAD_GATEWAY, INTERNAL_SERVER_ERROR # HTTP statuses to retry on
+                  methods: GET, POST # Request methods to retry
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      group-management-app:
+        registerHealthIndicator: true
+        slidingWindowSize: 100
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000000ms
+        permittedNumberOfCallsInHalfOpenState: 10
+        eventConsumerBufferSize: 10
+  timelimiter:
+    instances:
+      group-management-app:
+        timeoutDuration: 20s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, metrics, info, health, shutdown, beans
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  health:
+    diskspace:
+      enabled: false
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: false
+  metrics:
+    tags:
+      application: api-gateway-service
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+        resilience4j:
+          circuitbreaker:
+            calls: true
+
+eureka:
+  instance:
+    hostname: localhost
