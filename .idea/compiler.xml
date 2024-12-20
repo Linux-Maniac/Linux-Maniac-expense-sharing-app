@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="service-registry-app" />
         <module name="user-management-app" />
+        <module name="api-gateway-app" />
         <module name="expense-management-app" />
         <module name="group-management-app" />
       </profile>
@@ -19,6 +20,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="api-gateway-app" options="-parameters" />
       <module name="expense-management-app" options="-parameters" />
       <module name="group-management-app" options="-parameters" />
       <module name="service-registry-app" options="-parameters" />
