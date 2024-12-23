@@ -8,6 +8,6 @@ eureka:
 
 microservices:
   user-management-service-endpoints:
-    fetch-user-list-by-contact-uri: http://USER-MANAGEMENT-APP/user-management-app/user-management/user-details-list/by-contact
-    fetch-user-list-by-id: http://USER-MANAGEMENT-APP/user-management-app/user-management/user-details-list/by-id
+    fetch-user-list-by-contact-uri: http://USER-MANAGEMENT-APP/user-management-app/operations/user-details-list/by-contact
+    fetch-user-list-by-id: http://USER-MANAGEMENT-APP/user-management-app/operations/user-details-list/by-id
   
